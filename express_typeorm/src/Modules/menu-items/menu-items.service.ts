@@ -1,6 +1,6 @@
+import App from "../../app";
 import { MenuItem } from './entities/menu-item.entity';
 import { Repository } from "typeorm";
-import App from "../../app";
 
 export class MenuItemsService {
 
@@ -85,7 +85,24 @@ export class MenuItemsService {
     ]
   */
 
-  async getMenuItems() {
-    throw new Error('TODO in task 3');
-  }
+    async getMenuItems() {
+        const menuItems = await this.menuItemRepository.find()
+
+        const updatedItems = menuItems.reduce((acc: MenuItem[], item: MenuItem) => {
+        if (item.parentId) {
+            const parent = menuItems.find(i => i.id === item.parentId);
+            if (parent) {
+                if (!parent.children) {
+                    parent.children = [];
+                }
+                parent.children.push(item);
+            }
+        } else {
+            acc.push(item);
+        }
+        return acc;
+        }, []);
+
+        return updatedItems
+    }
 }

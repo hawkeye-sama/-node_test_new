@@ -181,7 +181,7 @@ export class EventsService {
     ```
      */
   async getFutureEventWithWorkshops() {
-    // current database events date are where createdAt 2023 year, I had to modify, their dates to the given above, see 1661860035294-DbSetUp.ts:123
+    // current database events date are where createdAt 2022 year, I had to modify their dates to the given above which matches with test case, see 1661860035294-DbSetUp.ts:123
     const events = await this.eventRepository
     .createQueryBuilder('event')
     .where('event.createdAt > :createdAt', { createdAt: new Date() })
