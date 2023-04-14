@@ -1,3 +1,5 @@
+**Note: Changes where made to express_typeorm**
+
 **Minimum Node Version: 16.5 or higher**
 
 Get started:
