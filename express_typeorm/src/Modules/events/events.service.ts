@@ -1,13 +1,15 @@
-import { Repository } from 'typeorm';
-import { Event } from './entities/event.entity';
 import App from "../../app";
-
+import { Event } from './entities/event.entity';
+import { Repository } from 'typeorm';
+import { Workshop } from './entities/workshop.entity';
 
 export class EventsService {
   private eventRepository: Repository<Event>;
+  private workshopRepository: Repository<Workshop>;
 
   constructor(app: App) {
     this.eventRepository = app.getDataSource().getRepository(Event);
+    this.workshopRepository = app.getDataSource().getRepository(Workshop);
   }
 
   async getWarmupEvents() {
@@ -92,7 +94,16 @@ export class EventsService {
      */
 
   async getEventsWithWorkshops() {
-    throw new Error('TODO task 1');
+    // Retrieve all events
+    const events = await this.eventRepository.find();
+    
+    // Retrieve workshops for each event
+    for (const event of events) {
+      event.workshops = await this.workshopRepository.find({
+        where: { eventId: event.id },
+      });
+    }
+    return events;
   }
 
   /* TODO: complete getFutureEventWithWorkshops so that it returns events with workshops, that have not yet started
