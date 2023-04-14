@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableForeignKey } from 'typeorm';
 
 export class CinemaSystem1663877813247 implements MigrationInterface {
   /**
@@ -31,7 +31,178 @@ export class CinemaSystem1663877813247 implements MigrationInterface {
    * As a cinema owner I dont want to configure the seating for every show
    */
   public async up(queryRunner: QueryRunner): Promise<void> {
-    throw new Error('TODO: implement migration in task 4');
+
+     /* ---- Table creation ---- */
+    
+    await queryRunner.createTable(
+      new Table({
+        name: 'user',
+        columns: [
+          {
+            name: 'id',
+            type: 'integer',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          { name: 'name', type: 'varchar' },
+          { name: 'type', type: 'varchar', enum: ['customer', 'owner'] }, // can be cinema owner, normal user
+          {
+            name: 'createdAt',
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP',
+          },
+        ],
+      }),
+    );
+
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'movie',
+        columns: [
+          {
+            name: 'id',
+            type: 'integer',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          { name: 'name', type: 'varchar' },
+          { name: 'ownedById', type: 'integer' },
+        ],
+      }),
+    );
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'showroom',
+        columns: [
+          {
+            name: 'id',
+            type: 'integer',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          { name: 'name', type: 'varchar' },
+        ],
+      }),
+    );
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'showroom_movie',
+        columns: [
+          {
+            name: 'id',
+            type: 'integer',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          { name: 'moviePlayingId', type: 'integer' }, // which movie playing
+          { name: 'showroomId', type: 'integer' }, // at which showroom is it playing at
+          { name: 'startTime',  // what is it starting
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP', 
+          },
+          { name: 'endTime', // what is it ending
+            type: 'timestamp',
+            default: 'CURRENT_TIMESTAMP', 
+          },
+        ],
+      }),
+    );
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'seat',
+        columns: [
+          {
+            name: 'id',
+            type: 'integer',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          { name: 'showroom_movieId', type: 'integer' }, // for which showroom this seat was booked and current movie playing
+          { name: 'type', type: 'varchar', enum: ['vip', 'couple', 'super'] }, // which seat type was booked
+        ],
+      }),
+    );
+
+    await queryRunner.createTable(
+      new Table({
+        name: 'ticket',
+        columns: [
+          {
+            name: 'id',
+            type: 'integer',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'increment',
+          },
+          { name: 'userId', type: 'integer' }, // who booked the movie
+          { name: 'seatId', type: 'integer' }, // which seat was booked
+          { name: 'price', type: 'integer' }
+        ],
+      }),
+    );
+
+    /* ---- FOREIGN KEYS ---- */
+
+    await queryRunner.createForeignKey(
+      'movie',
+      new TableForeignKey({
+        columnNames: ['ownedById'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'user',
+        onDelete: 'CASCADE',
+      }),
+    );
+
+    await queryRunner.createForeignKey(
+      'showroom_movie',
+      new TableForeignKey({
+        columnNames: ['moviePlayingId'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'movie',
+        onDelete: 'CASCADE',
+      }),
+    );
+
+    await queryRunner.createForeignKey(
+      'showroom_movie',
+      new TableForeignKey({
+        columnNames: ['showroomId'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'showroom',
+        onDelete: 'CASCADE',
+      }),
+    );
+    
+    await queryRunner.createForeignKey(
+      'seat',
+      new TableForeignKey({
+        columnNames: ['showroom_movieId'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'showroom_movie',
+        onDelete: 'CASCADE',
+      }),
+    );
+    
+        
+    await queryRunner.createForeignKey(
+      'ticket',
+      new TableForeignKey({
+        columnNames: ['seatId'],
+        referencedColumnNames: ['id'],
+        referencedTableName: 'seat',
+        onDelete: 'CASCADE',
+      }),
+    );    
+
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {}
