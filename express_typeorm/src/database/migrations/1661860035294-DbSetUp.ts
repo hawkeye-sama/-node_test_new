@@ -7,10 +7,10 @@ import {
 import {
   addYears,
   format,
-  subYears,
-  setMonth,
   setDate,
   setHours,
+  setMonth,
+  subYears,
 } from 'date-fns';
 
 export class DbSetUp1661860035294 implements MigrationInterface {
@@ -120,6 +120,7 @@ export class DbSetUp1661860035294 implements MigrationInterface {
       const date1 = format(subYears(new Date(), 1), 'yyyy');
       const date2 = format(addYears(new Date(), 1), 'yyyy');
 
+      // dates have been changed here manually line 131 and 134 so it matches correct value of test
       await queryRunner.query(
         `INSERT INTO \`event\` (\`id\`, \`name\`, \`createdAt\`) VALUES
           (1, 'Laravel convention ` +
@@ -127,10 +128,10 @@ export class DbSetUp1661860035294 implements MigrationInterface {
           `', '2022-05-27 02:38:54'),
           (2, 'Laravel convention ` +
           date2 +
-          `', '2022-05-27 02:38:54'),
+          `', '2023-04-20 07:01:00'),
           (3, 'React convention ` +
           date2 +
-          `', '2022-05-27 02:38:54')`,
+          `', '2023-04-20 07:01:00')`,
       );
 
       const time1 = setDate(setMonth(subYears(new Date(), 1), 1), 21);

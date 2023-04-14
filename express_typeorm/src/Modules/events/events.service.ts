@@ -94,15 +94,23 @@ export class EventsService {
      */
 
   async getEventsWithWorkshops() {
+    //* Sol 1 I did before
     // Retrieve all events
-    const events = await this.eventRepository.find();
+    // const events = await this.eventRepository.find();
     
     // Retrieve workshops for each event
-    for (const event of events) {
-      event.workshops = await this.workshopRepository.find({
-        where: { eventId: event.id },
-      });
-    }
+    // for (const event of events) {
+    //   event.workshops = await this.workshopRepository.find({
+    //     where: { eventId: event.id },
+    //   });
+    // }
+
+    // optimized version after doing task 2
+    const events = await this.eventRepository
+    .createQueryBuilder('event')
+    .leftJoinAndSelect('event.workshops', 'workshop')
+    .orderBy('workshop.id', 'ASC')
+    .getMany();
     return events;
   }
 
@@ -173,6 +181,13 @@ export class EventsService {
     ```
      */
   async getFutureEventWithWorkshops() {
-    throw new Error('TODO task 2');
+    // current database events date are where createdAt 2023 year, I had to modify, their dates to the given above, see 1661860035294-DbSetUp.ts:123
+    const events = await this.eventRepository
+    .createQueryBuilder('event')
+    .where('event.createdAt > :createdAt', { createdAt: new Date() })
+    .leftJoinAndSelect('event.workshops', 'workshop')
+    .orderBy('workshop.id', 'ASC')
+    .getMany();
+    return events
   }
 }
